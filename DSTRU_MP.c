@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 
 #define FALSE (0)
 #define TRUE (!(FALSE))
@@ -35,7 +36,8 @@ int getSet_F3(cartesian [][F_COL], cartesian [][F_COL], cartesian [][F_COL]);
 Boolean isOver(cartesian [][C_COL], cartesian [][C_COL], cartesian [][F_COL], cartesian [][P_COL], int);
 void addElement_F(cartesian *, cartesian [][F_COL]);
 void addElement_C(cartesian *, cartesian [][C_COL]);
-
+int getCardinalityOfPowerSetIntersectionSet_S(cartesian [][F_COL]);
+int getCardinality_C(cartesian [][C_COL]);
 
 int
 main()
@@ -65,7 +67,14 @@ main()
 	Boolean over = FALSE;
 	Boolean next = FALSE;
 
+	int nF3_Cardinality;
+	int nPSetF1_intersection_S_Cardinality;
+	int nPSetF2_intersection_S_Cardinality;
 	
+	int nC1_Cardinality;
+	int nC2_Cardinality;
+	
+	char results[7];
 	
 	// for value checking
 	printf("Set P:\n");
@@ -91,10 +100,8 @@ main()
 	
 	addElement_F(&set_P[1][0], set_F2);
 	addElement_F(&set_P[1][1], set_F2);
-
 	
-	
-	getSet_F3(set_F1, set_F2, set_F3);
+	nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
 	
 	printf("\n\nSet F3:\n");
 	for(int i=0; i<F_ROW; i++)
@@ -108,6 +115,70 @@ main()
 			
 	printf("\n\n");
 	}
+	// end of value checking
+	
+	
+	
+	
+	over = isOver(set_C1, set_C2, set_F3, set_P, nF3_Cardinality);
+	
+	
+//	NextPlayerMove (prototype)
+
+	// get pos from user (a,b)
+	// get (c,d)
+	// then...
+	
+	if(!over && next && (set_F3[pos.x+1][pos.y+1].x != 0 ) )
+	{
+		good = !good;
+		addElement_F(&pos, set_F1);
+	}
+	
+	else if(!over && !next && (set_F3[pos.x+1][pos.y+1].x != 0 ) )
+	{
+		good = !good;
+		addElement_F(&pos, set_F2);
+	}
+	
+	
+	// get cardinality of the (power set of set_F1) union (set_S)	possible results: 1-4
+	// get cardinality of the (power set of set_F2) union (set_S)	possible results: 1-4
+	nPSetF1_intersection_S_Cardinality = getCardinalityOfPowerSetIntersectionSet_S(set_F1);
+	nPSetF2_intersection_S_Cardinality = getCardinalityOfPowerSetIntersectionSet_S(set_F2);
+	
+	// get cardinality of set_C1	possible results: 1-4
+	// get cardinality of set_C2	possible results: 1-4
+	nC1_Cardinality = getCardinality_C(set_C1);
+	nC2_Cardinality = getCardinality_C(set_C2);
+	
+	if(!over && good && next && (nPSetF1_intersection_S_Cardinality > nC1_Cardinality))
+		addElement_C(&alt_pos, set_C1);
+		
+	else if(!over && good && !next && (nPSetF2_intersection_S_Cardinality > nC2_Cardinality))
+		addElement_C(&alt_pos, set_C2);
+		
+	
+	if(!over && good )
+		good = !good;
+	
+	
+// GameOver (prototype)	
+	
+	if(over && next && set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
+		strcpy(results, "A wins");
+	else if(over && next && set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
+		strcpy(results, "A wins");
+		
+		
+	if(over && !next && set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
+		strcpy(results, "B wins");
+	else if(over && !next && set_C2[0][1].x != 0 && set_C2[1][0].x != 0)
+		strcpy(results, "B wins");
+	
+	
+	if(!over)
+		next = !next;
 	
 	return 0;
 }
@@ -158,15 +229,14 @@ isOver(cartesian set_C1[][C_COL], cartesian set_C2[][C_COL],
 	if(nF3_Cardinality == 0)
 		bCon1 = TRUE;
 
-	// evaluating ?x (x ? P(C1) ? |x| > 0 ? x ? P)
+	// evaluating second condition
 	if(set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
 		bCon2 = TRUE;
 	
 	else if(set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
 		bCon2 = TRUE;
 	
-	
-	// evaluating ?x (x ? P(C2) ? |x| > 0 ? x ? P)
+	// evaluating third condition
 	if(set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
 		bCon3 = TRUE;
 	
@@ -207,3 +277,58 @@ addElement_C(cartesian * sElement, cartesian sSet[][C_COL])
 		sSet[xi][yi] = *sElement;
 }
 
+// gets the cardinality of the (power set of C) intersection (set S)
+int
+getCardinalityOfPowerSetIntersectionSet_S(cartesian sPowerSet[][F_COL])
+{
+	int nCardinality=0;
+	
+	// first element of set S
+	if(sPowerSet[0][0].x != 0) // (1,1)
+		if(sPowerSet[0][2].x != 0) // (1,3)
+			if(sPowerSet[1][1].x != 0) // (2,2)
+				if(sPowerSet[2][0].x != 0) // (3,1)
+					if(sPowerSet[2][2].x != 0) // (3,3)
+						nCardinality++;
+	
+	// second element		
+	if(sPowerSet[3][3].x != 0) // (4,4)
+		if(sPowerSet[3][5].x != 0) // (4,6)
+			if(sPowerSet[4][4].x != 0) // (5,5)
+				if(sPowerSet[5][3].x != 0) // (6,4)
+					if(sPowerSet[5][5].x != 0) // (6,6)
+						nCardinality++;					
+
+	// third
+	if(sPowerSet[0][4].x != 0) // (1,5)
+		if(sPowerSet[1][3].x != 0) // (2,4)
+			if(sPowerSet[1][4].x != 0) // (2,5)
+				if(sPowerSet[1][5].x != 0) // (2,6)
+					if(sPowerSet[2][4].x != 0) // (3,5)
+						nCardinality++;	
+	
+	// 4th					
+	if(sPowerSet[3][0].x != 0) // (1,1)
+		if(sPowerSet[3][2].x != 0) // (1,3)
+			if(sPowerSet[4][0].x != 0) // (2,2)
+				if(sPowerSet[4][2].x != 0) // (3,1)
+					if(sPowerSet[5][0].x != 0) // (3,3)
+						if(sPowerSet[5][2].x != 0) // (5,2)
+							nCardinality++;
+	
+	return nCardinality;
+}
+
+int
+getCardinality_C(cartesian sSet[][C_COL])
+{
+	int i, k, nCardinality=0;
+	
+	// checks if the coordinate is not empty
+	for(i=0; i<C_ROW; i++)
+		for(k=0; k<C_COL; k++)
+			if(sSet[i-1][k-1].x != 0)
+				nCardinality++;
+				
+	return nCardinality;
+}
