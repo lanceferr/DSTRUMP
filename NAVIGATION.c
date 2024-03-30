@@ -49,19 +49,24 @@ int main() {
         // Check if a key has been pressed
         if (kbhit()) {
             input = getch(); // Get the pressed key
-            switch (input) {
+            switch (input) 
+            {
+                case 'W':
                 case 'w':
                     if (indexRow > 0 && F[indexRow - 1][indexCol]) 
                         indexRow--;
                     break;
+                case 'A':
                 case 'a':
                     if (indexCol > 0 && F[indexRow][indexCol - 1]) 
                     indexCol--;
                     break;
+                case 'S':
                 case 's':
                     if (indexRow < ROWS - 1 && F[indexRow + 1][indexCol]) 
                         indexRow++;
                     break;
+                case 'D':
                 case 'd':
                     if (indexCol < COLS - 1 && F[indexRow][indexCol + 1]) 
                     indexCol++;
