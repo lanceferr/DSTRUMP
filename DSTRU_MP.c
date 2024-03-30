@@ -136,8 +136,8 @@ main()
 		navigateGrid(set_F1, set_F2, over, &indexRow, &indexCol, &pos, next);
 		
 		// get (c,d)		
-		alt_pos.x = (pos.x)/3 +1;
-		alt_pos.y = (pos.y)/3 +1;
+		alt_pos.x = (pos.x-1)/3 +1;
+		alt_pos.y = (pos.y-1)/3 +1;
 
 		// then...
 		
@@ -204,13 +204,13 @@ main()
 	
 	for(int i=0; i<2; i++)
 		for(int k=0; k<2; k++)
-			printf("(%d,%d)\n", set_C1[i][k].x+1,set_C1[i][k].y+1);
+			printf("(%d,%d)\n", set_C1[i][k].x,set_C1[i][k].y);
 			
 	printf("\n");
 			
 	for(int i=0; i<2; i++)
 		for(int k=0; k<2; k++)
-			printf("(%d,%d)\n", set_C2[i][k].x+1,set_C2[i][k].y+1);
+			printf("(%d,%d)\n", set_C2[i][k].x,set_C2[i][k].y);
 	
 	return 0;
 }
@@ -359,7 +359,7 @@ getCardinality_C(cartesian sSet[][C_COL])
 	// checks if the coordinate is not empty
 	for(i=0; i<C_ROW; i++)
 		for(k=0; k<C_COL; k++)
-			if(sSet[i-1][k-1].x != 0)
+			if(sSet[i][k].x != 0)
 				nCardinality++;
 				
 	return nCardinality;
