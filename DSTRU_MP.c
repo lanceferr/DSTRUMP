@@ -13,13 +13,6 @@
 #define F_ROW 6
 #define F_COL 6
 
-#define P_ROW 2
-#define P_COL 2
-
-#define S_ROW 4
-#define S_COL 6
-
-
 typedef int Boolean; // either TRUE or FALSE
 
 struct cartesianTag
@@ -32,38 +25,39 @@ struct cartesianTag
 typedef struct cartesianTag cartesian;
 
 
-// insert function prototypes
-
 int getSet_F3(cartesian [][F_COL], cartesian [][F_COL], cartesian [][F_COL]);
 Boolean isOver(cartesian [][C_COL], cartesian [][C_COL], cartesian [][F_COL], int);
 void addElement_F(cartesian *, cartesian [][F_COL]);
 void addElement_C(cartesian *, cartesian [][C_COL]);
-int getPatternCompleted(cartesian [][F_COL]);
+int getPatternsCompleted(cartesian [][F_COL]);
 int getCardinality_C(cartesian [][C_COL]);
-void displayGrid(cartesian [][F_COL], cartesian [][F_COL], Boolean, cartesian *, int);
+void displayGrid(cartesian [][F_COL], cartesian [][F_COL], cartesian *, Boolean, Boolean);
 void navigateGrid(cartesian [][F_COL], cartesian [][F_COL], int, int *, int *, cartesian *, Boolean);
 
 
 int
 main()
 {
+	/*
+		definition of sets P and S from MP specs for reference
+		
+		each element corresponds to a quadrant
+		cartesian set_P[P_ROW][P_COL] = {{{1,1}, {2,2}},  {{1,2}, {2,1}}};
+		
 	
-	// definition of sets P and S from MP specs for reference
-	
-//	each element corresponds to a quadrant
-//	cartesian set_P[P_ROW][P_COL] = {{{1,1}, {2,2}},  {{1,2}, {2,1}}};
-//	
-
-//	each row corresponds to a pattern in one quadrant
-//	cartesian set_S[S_ROW][S_COL] = {{{1,1}, {1,3}, {2,2}, {3,1}, {3,3}},
-//									 {{4,4}, {4,6}, {5,5}, {6,4}, {6,6}},
-//									 {{1,5}, {2,4}, {2,5}, {2,6}, {3,5}},
-//									 {{4,1}, {4,3}, {5,1}, {5,3}, {6,1}, {6,3}}};
+		each row corresponds to a pattern in one quadrant
+		cartesian set_S[S_ROW][S_COL] = {{{1,1}, {1,3}, {2,2}, {3,1}, {3,3}},
+										 {{4,4}, {4,6}, {5,5}, {6,4}, {6,6}},
+										 {{1,5}, {2,4}, {2,5}, {2,6}, {3,5}},
+										 {{4,1}, {4,3}, {5,1}, {5,3}, {6,1}, {6,3}}};
+	*/
 		
 	// variable declarations
 	
 	/*
 		set variables
+		player A = 1
+		player B = 2
 		set_C 1-2 contains quadrants in which the pattern is completed by player A and B respectively
 		set_F 1-2 contains the spaces occupied by player A and B respectively
 		set_F3 contains the empty spaces
@@ -77,13 +71,11 @@ main()
 		quad_pos is the quadrant where pos is (e.g. top-left <=> (1,1))
 		temp_pos is the indicator where the player is currently in
 	*/
-	cartesian pos = {0};
-	cartesian quad_pos = {0};
-	cartesian temp_pos = {0};
+	cartesian pos = {0}, quad_pos = {0}, temp_pos = {0};
 	
 	/*
 		control variables
-		good determines if a move done by the player should be reflected in the grid
+		good determines if a new space is occupied
 		over determines if the game is over
 		next determines which player is supposed to move
 	*/
@@ -92,16 +84,23 @@ main()
 	Boolean next = FALSE;
 	
 	/*
+		counter variables
+		nF_PatternCompleted 1-2 is the number of patterns completed by the player
+								checked manually
+		nF3_Cardinality is the number of empty spaces in the grid
 		
+		nC_Cardinality 1-2 is the number of patterns completed by the player
+						   checked by relying on set_C 1 or 2
 	*/
-	int nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
 	int nF1_PatternCompleted;
 	int nF2_PatternCompleted;
+	int nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
 	
 	int nC1_Cardinality;
 	int nC2_Cardinality;
 	
 	/*
+		character variables
 		results indicates the winner of the game
 		input contains the character entered by the player while navigating in the grid
 	*/
@@ -111,129 +110,128 @@ main()
 	
 	// game start
 	do	
-	{
-		
-	//	NextPlayerMove (prototype)
-		
-		// Display the initial gridd
-	    displayGrid(set_F1, set_F2, over, &temp_pos, next);
+	{		
+		// displays the initial grid
+	    displayGrid(set_F1, set_F2, &temp_pos, over, next);
 	
 	    // loop
-	    do { 
-	        // Check if a key has been pressed
-//	        if (kbhit()) {
-	            input = getch(); // Get the pressed key
-	            switch (input) 
-	            {
-	                case 'W':
-	                case 'w':
-	                    if (temp_pos.x > 0) 
-	                        temp_pos.x--;
-	                    break;
-	                case 'A':
-	                case 'a':
-	                    if (temp_pos.y > 0) 
-	                	    temp_pos.y--;
-	                    break;
-	                case 'S':
-	                case 's':
-	                    if (temp_pos.x < F_ROW - 1) 
-	                        temp_pos.x++;
-	                    break;
-	                case 'D':
-	                case 'd':
-	                    if (temp_pos.y < F_COL - 1) 
-	                    	temp_pos.y++;
-	                    break;
-	
-	                case '\r': // Enter key
-	               		pos = temp_pos;
+	    do
+		{
+	        input = getch(); // gets the pressed key
+	           
+	        // converts WASD to up, left, down, right
+	        switch (input) 
+	        {
+	    		case 'W':
+	        	case 'w':
+	                if (temp_pos.x > 0) 
+	                    temp_pos.x--;
+	                break;
+	            case 'A':
+	            case 'a':
+	            	if (temp_pos.y > 0) 
+	                	temp_pos.y--;
+	                break;
+	        	case 'S':
+	            case 's':
+	                if (temp_pos.x < F_ROW - 1) 
+	                    temp_pos.x++;
+	                break;
+	            case 'D':
+	            case 'd':
+	                if (temp_pos.y < F_COL - 1) 
+	                    temp_pos.y++;
+	                break;
+
+	            case '\r': // enter key
+						                
+	                // gets the position entered by the player
+	               	pos = temp_pos;
 	                    
-	                    if (set_F3[pos.x][pos.y].x != 0) 
-	                    {                   
-							good = !good;
+	                // checks if the space is occupied
+	                if (set_F3[pos.x][pos.y].x != 0) 
+	                {                   
+	                    // tells the program that there is a new addition to the spaces occupied
+						good = !good;
 							
-							if(next)
-								addElement_F(&pos, set_F1);	
+						// adds the space to the spaces occupied by player A or B
+						if(next)
+							addElement_F(&pos, set_F1);	
 								
-							else if(!next)
-								addElement_F(&pos, set_F2);		
-	                    }
-	                    	
-	                
-//	                default:
-//	                    break;
-	            }
+						else if(!next)
+							addElement_F(&pos, set_F2);		
+	                }
+	        }
 	
-	            // Display the updated grid
-	            displayGrid(set_F1, set_F2, over, &temp_pos, next);
-	            
-//	        }
+	        // displays the updated grid
+	        displayGrid(set_F1, set_F2, &temp_pos, over, next);
+	        
 	    }while (input != '\r');
+	    
+	    // removes the enter key in input
 		input = '\0';
 		
-		// get (c,d)
-		quad_pos.x = (pos.x)/3 ;
-		quad_pos.y = (pos.y)/3 ;	
-		
-		nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
-		
-		// get cardinality of the (power set of set_F1) union (set_S)	possible results: 1-4
-		// get cardinality of the (power set of set_F2) union (set_S)	possible results: 1-4
-		nF1_PatternCompleted = getPatternCompleted(set_F1);
-		nF2_PatternCompleted = getPatternCompleted(set_F2);
-		
-		// get cardinality of set_C1	possible results: 1-4
-		// get cardinality of set_C2	possible results: 1-4
-		nC1_Cardinality = getCardinality_C(set_C1);
-		nC2_Cardinality = getCardinality_C(set_C2);
-		
-		if(good && next && (nF1_PatternCompleted > nC1_Cardinality))
-			addElement_C(&quad_pos, set_C1);
+		// if there is a new space occupied
+		if(good)
+		{
+			// determines which quadrant the pos is in
+			quad_pos.x = (pos.x)/3 ;
+			quad_pos.y = (pos.y)/3 ;	
 			
-		else if(good && !next && (nF2_PatternCompleted > nC2_Cardinality))
-			addElement_C(&quad_pos, set_C2);
+			// updates the empty spaces left
+			nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
 			
-		
-		if(!over && good )
-			good = !good;
-		
-		
-		over = isOver(set_C1, set_C2, set_F3, nF3_Cardinality);
-		
-	// GameOver (prototype)	
-		
-		if(over && next && set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
-			strcpy(results, "A wins");
-		else if(over && next && set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
-			strcpy(results, "A wins");
+			// determines the actual number of patterns completed
+			nF1_PatternCompleted = getPatternsCompleted(set_F1);
+			nF2_PatternCompleted = getPatternsCompleted(set_F2);
 			
-		else if(over && !next && set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
-			strcpy(results, "B wins");
-		else if(over && !next && set_C2[0][1].x != 0 && set_C2[1][0].x != 0)
-			strcpy(results, "B wins");
+			// determines the number of patterns completed that currently are stored in the set_C 1-2
+			nC1_Cardinality = getCardinality_C(set_C1);
+			nC2_Cardinality = getCardinality_C(set_C2);
+			
+			// determines if there is a new pattern completed, then adds it to set_C 1 or 2
+			if(next && (nF1_PatternCompleted > nC1_Cardinality))
+				addElement_C(&quad_pos, set_C1);	
+			else if(!next && (nF2_PatternCompleted > nC2_Cardinality))
+				addElement_C(&quad_pos, set_C2);
+				
+			// determines if the game is over
+			over = isOver(set_C1, set_C2, set_F3, nF3_Cardinality);
 		
-		else if(over)
-			strcpy(results, "Draw");
+			// resets the flag
+			if(!over)
+				good = !good;
+		}
 		
-		if(!over)
+		// determines the winner if the game is over
+		if(over)
+		{
+			// checks if player A won
+			if(next && set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
+				strcpy(results, "A wins");
+			else if(next && set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
+				strcpy(results, "A wins");
+			
+			// checks if player B won
+			else if(!next && set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
+				strcpy(results, "B wins");
+			else if(!next && set_C2[0][1].x != 0 && set_C2[1][0].x != 0)
+				strcpy(results, "B wins");
+			
+			// game over due to no empty spaces left
+			else
+				strcpy(results, " Draw ");
+		}
+			
+		// ends the turn of the current player
+		else
 			next = !next;
 	
 	}while(!over);
 	
-	
-	displayGrid(set_F1, set_F2, over, &temp_pos, next);
-	printf("\n\n%s\n", results);
-	
-	for(int i=0; i<2; i++)
-		for(int k=0; k<2; k++)
-			printf("(%d,%d)\n", set_C1[i][k].x,set_C1[i][k].y);
-			
-	printf("\n");
-			
-	for(int i=0; i<2; i++)
-		for(int k=0; k<2; k++)
-			printf("(%d,%d)\n", set_C2[i][k].x,set_C2[i][k].y);
+	// displays the final grid along with the game result
+	displayGrid(set_F1, set_F2, &temp_pos, over, next);
+	printf("\t\t\t\t                        %s\n\n", results);
 	
 	return 0;
 }
@@ -241,7 +239,11 @@ main()
 
 // function definitions
 
-// solves for set F3
+/*
+	getSet_F3 - determines the which spaces are not taken by set_F 1-2
+	
+	returns the cardinality of set_F3
+*/
 int
 getSet_F3(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], cartesian set_F3[][F_COL])
 {
@@ -252,8 +254,10 @@ getSet_F3(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], cartesian set_F3
 		for(j=0; j<F_COL; j++)
 		
 			// assigns value to set F3 if the space is not taken by set F1 and F2
-			// elements are stored according to their values:
-			// x = row		y = col
+			/* 
+				elements are stored according to their values:
+				x = row		y = col
+			*/
 			if(set_F1[i][j].x == 0 && set_F2[i][j].x == 0)
 			{
 				set_F3[i][j].x = i + 1;
@@ -271,7 +275,12 @@ getSet_F3(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], cartesian set_F3
 	return nCardinality;
 }
 
-// determines if over
+/*
+	isOver - determines if the game is over
+	
+	returns TRUE if the game is over
+	returns FALSE otherwise
+*/
 Boolean
 isOver(cartesian set_C1[][C_COL], cartesian set_C2[][C_COL],
 	   cartesian set_F3[][F_COL], int nF3_Cardinality)
@@ -280,38 +289,43 @@ isOver(cartesian set_C1[][C_COL], cartesian set_C2[][C_COL],
 			bCon2 = FALSE,
 			bCon3 = FALSE;
 			
-	// evaluating (|F3| = 0)
+	// checks if there are no more empty spaces left
 	if(nF3_Cardinality == 0)
 		bCon1 = TRUE;
 
-	// evaluating second condition
+	// checks if player A completed the top-left and bottom-right patterns
 	if(set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
 		bCon2 = TRUE;
-	
+		
+	// checks if player A completed the top-right and bottom-left patterns
 	else if(set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
 		bCon2 = TRUE;
 	
-	// evaluating third condition
+	// checks if player B completed the top-left and bottom-right patterns
 	if(set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
 		bCon3 = TRUE;
 	
+	// checks if player B completed the top-right and bottom-left patterns	
 	else if(set_C2[0][1].x != 0 && set_C2[1][0].x != 0)
 		bCon3 = TRUE;
 	
-	
-	// evaluating (over)
+	// game is over if at least one of the conditions is true
 	if(bCon1 || bCon2 || bCon3)
 		return TRUE;
 	
+	// game continues
 	return FALSE;
 }
 
-// adds an element to a set that is a subset of set F
+/*
+	addElement_F - adds a space to the spaces occupied by
+				   the player
+*/
 void
 addElement_F(cartesian * sElement, cartesian sSet[][F_COL])
 {	
 	// elements are stored according to their values:
-	// x = row		y = col	
+	// cartesian x = row index + 1		cartesian y = col index + 1
 	if(sSet[sElement->x][sElement->y].x == 0)
 	{
 		sSet[sElement->x][sElement->y].x = sElement->x + 1;
@@ -320,12 +334,15 @@ addElement_F(cartesian * sElement, cartesian sSet[][F_COL])
 	}
 }
 
-// adds an element to a set that is a subset of set C
+/*
+	addElement_C - adds a quadrant to the quadrants in which
+				   the pattern is completed by the player
+*/
 void
 addElement_C(cartesian * sElement, cartesian sSet[][C_COL])
 {
 	// elements are stored according to their values:
-	// x = row		y = col	
+	// cartesian x = row index + 1		cartesian y = col index + 1
 	if(sSet[sElement->x][sElement->y].x == 0)
 	{
 		sSet[sElement->x][sElement->y].x = sElement->x + 1;
@@ -334,13 +351,18 @@ addElement_C(cartesian * sElement, cartesian sSet[][C_COL])
 	}
 }
 
-// gets the cardinality of the (power set of F) intersection (set S)
+/*
+	getPatternsCompleted - counts the patterns completed by a player
+						   by checking the occupied spaces manually
+	
+	returns the count
+*/
 int
-getPatternCompleted(cartesian sPowerSet[][F_COL])
+getPatternsCompleted(cartesian sPowerSet[][F_COL])
 {
 	int nCardinality=0;
 	
-	// first element of set S
+	// first element of set_S
 	if(sPowerSet[0][0].x != 0) // (1,1)
 		if(sPowerSet[0][2].x != 0) // (1,3)
 			if(sPowerSet[1][1].x != 0) // (2,2)
@@ -376,6 +398,12 @@ getPatternCompleted(cartesian sPowerSet[][F_COL])
 	return nCardinality;
 }
 
+/*
+	getCardinality_C - counts the number of completed patterns
+					   by checking set_C 1 or 2
+				       
+	returns the count
+*/
 int
 getCardinality_C(cartesian sSet[][C_COL])
 {
@@ -390,115 +418,87 @@ getCardinality_C(cartesian sSet[][C_COL])
 	return nCardinality;
 }
 
-// Function to display the grid
-void displayGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], Boolean over, cartesian *temp_pos, int next) 
+/*
+	displayGrid - displays the current state of the grid, showing
+				  the player position, occupied spaces, and empty
+				  spaces
+*/
+void displayGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL],
+			     cartesian *temp_pos, Boolean over, Boolean next) 
 {
-    int i, j;
+    int i, k;
     
     // clear the screen
     system("cls");
     
-    if(over)
-    {
-    	printf("GAME OVER\n");
-	}
-	else
+    // if the game is not yet over
+    if(!over)
 	{
-		// 85
+		// displays game header
 		printf("\n\n\t\t\\vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/\n");
+		printf("\t\t>                                                                                   <\n");
 		printf("\t\t>                                                                                   <\n");
 	    printf("\t\t>                       WELCOME TO THE DSTRU OF DEATH GAME >:)                      <\n");
 	    printf("\t\t>                                                                                   <\n");
+	    printf("\t\t>                                                                                   <\n");
 	    printf("\t\t/^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\\n\n");
 	    
-	    printf("\t\tpress WASD to navigate and press ENTER to place your position\n");
-	    printf("\t\t| * | current position\n\n");
-	    if(next == 0)
-	    printf("\t\tPlayer B turn\n\n\n");
-	    else if(next == 1)
-	    printf("\t\tPlayer A turn\n\n\n");
+	    // displays game instruction
+	    printf("\t\tPress WASD to navigate and press ENTER to place your position\n");
+	    printf("\t\t[ * ] - Current position\n");
+	    printf("\t\t[ . ] - Empty space\n\n");
+	    
+	    // displays winning condition
+	    printf("\t\t                                  WINNING CONDITION\n\n\n");
+	    printf("\t\t             [X]        [ ]        [X]        [ ]        [O]        [ ]\n\n");
+	    printf("\t\t             [ ]        [X]        [ ]        [O]        [O]        [O]\n\n");
+	    printf("\t\t             [X]        [ ]        [X]        [ ]        [O]        [ ]\n\n");
+	    printf("\t\t             [O]        [ ]        [O]        [X]        [ ]        [X]\n\n");
+	    printf("\t\t             [O]        [ ]        [O]        [ ]        [X]        [ ]\n\n");
+	    printf("\t\t             [O]        [ ]        [O]        [X]        [ ]        [X]\n\n");
+	    printf("\t\tOccupy either all X or all O in the grid to win\n\n\n");
+	    
+	    // displays which player's turn it is
+	    if(!next)
+	   		printf("\t\tPlayer B's turn");
+	    else
+	    	printf("\t\tPlayer A's turn");
 	}
 
-    for (i = 0; i < F_ROW; i++) {
-        for (j = 0; j < F_COL; j++) {
-            if (i == temp_pos->x && j == temp_pos->y && !over)
-                printf("\t\t| * |"); // Player position
-            else if(set_F1[i][j].x != 0)
-                printf("\t\t| A |"); // Box status
-            else if(set_F2[i][j].x != 0)
-                printf("\t\t| B |"); // Box status
+	// displays the current state of the grid
+    for (i=0; i<F_ROW; i++) 
+	{
+		printf("\n\n\n");
+        for (k=0; k<F_COL; k++) 
+		{
+			// current position of the player
+            if (i == temp_pos->x && k == temp_pos->y && !over)
+                printf("\t\t[ * ]");
+            
+            // spaces occupied by player A
+            else if(set_F1[i][k].x != 0)
+                printf("\t\t[ A ]");
+            
+            // spaces occupied by player B
+            else if(set_F2[i][k].x != 0)
+                printf("\t\t[ B ]"); 
+            
+            // empty spaces
             else
-            	printf("\t\t| . |");
-            
+            	printf("\t\t[ . ]");
         }
-        printf("\n\n");
     }
-}
-
-/*
-void
-navigateGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], Boolean over,
-		     int *indexRow, int *indexCol, cartesian *pos, Boolean next)
-{
-	char input;
 	
-    // Display the initial gridd
-    displayGrid(set_F1, set_F2, over, *indexRow, *indexCol, next);
-
-    // loop
-    do { 
-        // Check if a key has been pressed
-        if (kbhit()) {
-            input = getch(); // Get the pressed key
-            switch (input) 
-            {
-                case 'W':
-                case 'w':
-                    if (*indexRow > 0) 
-                        (*indexRow)--;
-                    break;
-                case 'A':
-                case 'a':
-                    if (*indexCol > 0) 
-                    (*indexCol)--;
-                    break;
-                case 'S':
-                case 's':
-                    if (*indexRow < F_ROW - 1) 
-                        (*indexRow)++;
-                    break;
-                case 'D':
-                case 'd':
-                    if (*indexCol < F_COL - 1) 
-                    (*indexCol)++;
-                    break;
-
-                case '\r': // Enter key
-                    if (set_F1[*indexRow][*indexCol].x == 0 && set_F2[*indexRow][*indexCol].x == 0) 
-                    {
-                    	pos->x = *indexRow + 1;
-                    	pos->y = *indexCol + 1;
-                    	
-                        if (next)
-                        {
-                        	set_F1[*indexRow][*indexCol].x = *indexRow+1; // Place player position
-                        	set_F1[*indexRow][*indexCol].y = *indexCol+1;
-                        }
-                        else if(!next)
-                        {
-                        	set_F2[*indexRow][*indexCol].x = *indexRow+1; // Place player position
-                        	set_F2[*indexRow][*indexCol].y = *indexCol+1;
-                        }
-                    }
-                
-                default:
-                    break;
-            }
-
-            // Display the updated grid
-            displayGrid(set_F1, set_F2, over, *indexRow, *indexCol, next);
-            
-        }
-    }while (input != '\r');
+	printf("\n\n\n");
+	
+	// if the game is over
+    if(over)
+    {
+    	// display game over message above the final state of the grid
+    	printf("\t\t\t\t\\vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/\n");
+    	printf("\t\t\t\t>                                                   <\n");
+    	printf("\t\t\t\t>                      GAME OVER                    <\n");
+    	printf("\t\t\t\t>                                                   <\n");
+    	printf("\t\t\t\t/^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\\n\n\n");
+	}
 }
-*/

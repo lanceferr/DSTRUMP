@@ -38,7 +38,7 @@ int getSet_F3(cartesian [][F_COL], cartesian [][F_COL], cartesian [][F_COL]);
 Boolean isOver(cartesian [][C_COL], cartesian [][C_COL], cartesian [][F_COL], cartesian [][P_COL], int);
 void addElement_F(cartesian *, cartesian [][F_COL]);
 void addElement_C(cartesian *, cartesian [][C_COL]);
-int getPatternCompleted(cartesian [][F_COL]);
+int getPatternsCompleted(cartesian [][F_COL]);
 int getCardinality_C(cartesian [][C_COL]);
 void displayGrid(cartesian [][F_COL], cartesian [][F_COL], Boolean, int, int, int);
 void navigateGrid(cartesian [][F_COL], cartesian [][F_COL], int, int *, int *, cartesian *, Boolean);
@@ -157,8 +157,8 @@ main()
 		
 		// get cardinality of the (power set of set_F1) union (set_S)	possible results: 1-4
 		// get cardinality of the (power set of set_F2) union (set_S)	possible results: 1-4
-		nF1_PatternCompleted = getPatternCompleted(set_F1);
-		nF2_PatternCompleted = getPatternCompleted(set_F2);
+		nF1_PatternCompleted = getPatternsCompleted(set_F1);
+		nF2_PatternCompleted = getPatternsCompleted(set_F2);
 		
 		// get cardinality of set_C1	possible results: 1-4
 		// get cardinality of set_C2	possible results: 1-4
@@ -311,7 +311,7 @@ addElement_C(cartesian * sElement, cartesian sSet[][C_COL])
 
 // gets the cardinality of the (power set of F) intersection (set S)
 int
-getPatternCompleted(cartesian sPowerSet[][F_COL])
+getPatternsCompleted(cartesian sPowerSet[][F_COL])
 {
 	int nCardinality=0;
 	
