@@ -1,6 +1,8 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 
 #define FALSE (0)
 #define TRUE (!(FALSE))
@@ -22,7 +24,7 @@ typedef int Boolean; // either TRUE or FALSE
 
 struct cartesianTag
 {
-	// (x, y)
+	// (x, y) 	x for row		y for column
 	int x;
 	int y;
 };
@@ -36,8 +38,11 @@ int getSet_F3(cartesian [][F_COL], cartesian [][F_COL], cartesian [][F_COL]);
 Boolean isOver(cartesian [][C_COL], cartesian [][C_COL], cartesian [][F_COL], cartesian [][P_COL], int);
 void addElement_F(cartesian *, cartesian [][F_COL]);
 void addElement_C(cartesian *, cartesian [][C_COL]);
-int getCardinalityOfPowerSetIntersectionSet_S(cartesian [][F_COL]);
+int getPatternCompleted(cartesian [][F_COL]);
 int getCardinality_C(cartesian [][C_COL]);
+void displayGrid(cartesian [][F_COL], cartesian [][F_COL], Boolean, int, int, int);
+void navigateGrid(cartesian [][F_COL], cartesian [][F_COL], int, int *, int *, cartesian *, Boolean);
+
 
 int
 main()
@@ -62,14 +67,17 @@ main()
 	// (c, d)
 	cartesian alt_pos = {0};
 	
+	int indexRow = 0;
+	int indexCol = 0;
+	
 	// other variable declarations
 	Boolean good = FALSE;
 	Boolean over = FALSE;
 	Boolean next = FALSE;
 
-	int nF3_Cardinality;
-	int nPSetF1_intersection_S_Cardinality;
-	int nPSetF2_intersection_S_Cardinality;
+	int nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
+	int nF1_PatternCompleted;
+	int nF2_PatternCompleted;
 	
 	int nC1_Cardinality;
 	int nC2_Cardinality;
@@ -95,90 +103,114 @@ main()
 	}
 	
 	
-	addElement_F(&set_P[0][0], set_F1);
-	addElement_F(&set_P[0][1], set_F1);
-	
-	addElement_F(&set_P[1][0], set_F2);
-	addElement_F(&set_P[1][1], set_F2);
-	
-	nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
-	
-	printf("\n\nSet F3:\n");
-	for(int i=0; i<F_ROW; i++)
-	{
-		for(int j=0; j<F_COL; j++)
-//			printf("(%d, %d)\t", set_F3[i][j].x, set_F3[i][j].y);
-			if(set_F3[i][j].x == 0)
-				printf("0\t");
-			else
-				printf("1\t");
-			
-	printf("\n\n");
-	}
+//	addElement_F(&set_P[0][0], set_F1);
+//	addElement_F(&set_P[0][1], set_F1);
+//	
+//	addElement_F(&set_P[1][0], set_F2);
+//	addElement_F(&set_P[1][1], set_F2);
+//	
+//	nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
+//	
+//	printf("\n\nSet F3:\n");
+//	for(int i=0; i<F_ROW; i++)
+//	{
+//		for(int j=0; j<F_COL; j++)
+////			printf("(%d, %d)\t", set_F3[i][j].x, set_F3[i][j].y);
+//			if(set_F3[i][j].x == 0)
+//				printf("0\t");
+//			else
+//				printf("1\t");
+//			
+//	printf("\n\n");
+//	}
 	// end of value checking
 	
 	
-	
-	
-	over = isOver(set_C1, set_C2, set_F3, set_P, nF3_Cardinality);
-	
-	
-//	NextPlayerMove (prototype)
 
-	// get pos from user (a,b)
-	// get (c,d)
-	// then...
-	
-	if(!over && next && (set_F3[pos.x+1][pos.y+1].x != 0 ) )
+		
+	do	
 	{
-		good = !good;
-		addElement_F(&pos, set_F1);
-	}
-	
-	else if(!over && !next && (set_F3[pos.x+1][pos.y+1].x != 0 ) )
-	{
-		good = !good;
-		addElement_F(&pos, set_F2);
-	}
-	
-	
-	// get cardinality of the (power set of set_F1) union (set_S)	possible results: 1-4
-	// get cardinality of the (power set of set_F2) union (set_S)	possible results: 1-4
-	nPSetF1_intersection_S_Cardinality = getCardinalityOfPowerSetIntersectionSet_S(set_F1);
-	nPSetF2_intersection_S_Cardinality = getCardinalityOfPowerSetIntersectionSet_S(set_F2);
-	
-	// get cardinality of set_C1	possible results: 1-4
-	// get cardinality of set_C2	possible results: 1-4
-	nC1_Cardinality = getCardinality_C(set_C1);
-	nC2_Cardinality = getCardinality_C(set_C2);
-	
-	if(!over && good && next && (nPSetF1_intersection_S_Cardinality > nC1_Cardinality))
-		addElement_C(&alt_pos, set_C1);
 		
-	else if(!over && good && !next && (nPSetF2_intersection_S_Cardinality > nC2_Cardinality))
-		addElement_C(&alt_pos, set_C2);
+	//	NextPlayerMove (prototype)
 		
-	
-	if(!over && good )
-		good = !good;
-	
-	
-// GameOver (prototype)	
-	
-	if(over && next && set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
-		strcpy(results, "A wins");
-	else if(over && next && set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
-		strcpy(results, "A wins");
+		navigateGrid(set_F1, set_F2, over, &indexRow, &indexCol, &pos, next);
+		
+		// get (c,d)		
+		alt_pos.x = (pos.x)/3 +1;
+		alt_pos.y = (pos.y)/3 +1;
+
+		// then...
+		
+//		if(!over && next && (set_F3[pos.x+1][pos.y+1].x != 0 ) )
+//		{
+//			good = !good;
+//			addElement_F(&pos, set_F1);
+//		}
+//		
+//		else if(!over && !next && (set_F3[pos.x+1][pos.y+1].x != 0 ) )
+//		{
+//			good = !good;
+//			addElement_F(&pos, set_F2);
+//		}		
+		
+		nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
+		
+		// get cardinality of the (power set of set_F1) union (set_S)	possible results: 1-4
+		// get cardinality of the (power set of set_F2) union (set_S)	possible results: 1-4
+		nF1_PatternCompleted = getPatternCompleted(set_F1);
+		nF2_PatternCompleted = getPatternCompleted(set_F2);
+		
+		// get cardinality of set_C1	possible results: 1-4
+		// get cardinality of set_C2	possible results: 1-4
+		nC1_Cardinality = getCardinality_C(set_C1);
+		nC2_Cardinality = getCardinality_C(set_C2);
+		
+		if(!over /*&& good*/ && next && (nF1_PatternCompleted > nC1_Cardinality))
+			addElement_C(&alt_pos, set_C1);
+			
+		else if(!over /*&& good*/ && !next && (nF2_PatternCompleted > nC2_Cardinality))
+			addElement_C(&alt_pos, set_C2);
+			
+		
+		if(!over && good )
+			good = !good;
 		
 		
-	if(over && !next && set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
-		strcpy(results, "B wins");
-	else if(over && !next && set_C2[0][1].x != 0 && set_C2[1][0].x != 0)
-		strcpy(results, "B wins");
+		over = isOver(set_C1, set_C2, set_F3, set_P, nF3_Cardinality);
+		
+	// GameOver (prototype)	
+		
+		if(over && next && set_C1[0][0].x != 0 && set_C1[1][1].x != 0)
+			strcpy(results, "A wins");
+		else if(over && next && set_C1[0][1].x != 0 && set_C1[1][0].x != 0)
+			strcpy(results, "A wins");
+			
+		else if(over && !next && set_C2[0][0].x != 0 && set_C2[1][1].x != 0)
+			strcpy(results, "B wins");
+		else if(over && !next && set_C2[0][1].x != 0 && set_C2[1][0].x != 0)
+			strcpy(results, "B wins");
+		
+		else if(over)
+			strcpy(results, "No win");
+		
+		if(!over)
+			next = !next;
+	
+	}while(!over);
 	
 	
-	if(!over)
-		next = !next;
+	displayGrid(set_F1, set_F2, over, indexRow, indexCol, next);
+	printf("\n\n%s\n", results);
+	
+	for(int i=0; i<2; i++)
+		for(int k=0; k<2; k++)
+			printf("(%d,%d)\n", set_C1[i][k].x+1,set_C1[i][k].y+1);
+			
+	printf("\n");
+			
+	for(int i=0; i<2; i++)
+		for(int k=0; k<2; k++)
+			printf("(%d,%d)\n", set_C2[i][k].x+1,set_C2[i][k].y+1);
 	
 	return 0;
 }
@@ -277,9 +309,9 @@ addElement_C(cartesian * sElement, cartesian sSet[][C_COL])
 		sSet[xi][yi] = *sElement;
 }
 
-// gets the cardinality of the (power set of C) intersection (set S)
+// gets the cardinality of the (power set of F) intersection (set S)
 int
-getCardinalityOfPowerSetIntersectionSet_S(cartesian sPowerSet[][F_COL])
+getPatternCompleted(cartesian sPowerSet[][F_COL])
 {
 	int nCardinality=0;
 	
@@ -331,4 +363,106 @@ getCardinality_C(cartesian sSet[][C_COL])
 				nCardinality++;
 				
 	return nCardinality;
+}
+
+// Function to display the grid
+void displayGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], Boolean over, int indexRow, int indexCol, int next) 
+{
+    system("cls"); // Clear the screen (Windows specific)
+    int i, j;
+    
+    if(over)
+    {
+    	printf("GAME OVER\n");
+	}
+	else
+	{
+	    printf("WELCOME TO THE DSTRU OF DEATH GAME >:)\n");
+	    printf("press WASD to navigate and press ENTER place your position\n");
+	    if(next == 0)
+	    printf("\nplayer 2 turn\n\n");
+	    else if(next == 1)
+	    printf("\nplayer 1 turn\n\n");
+	}
+
+    for (i = 0; i < F_ROW; i++) {
+        for (j = 0; j < F_COL; j++) {
+            if (i == indexRow && j == indexCol && !over)
+                printf("\t|*|"); // Player position
+            else if(set_F1[i][j].x != 0)
+                printf("\t|A|"); // Box status
+            else if(set_F2[i][j].x != 0)
+                printf("\t|B|"); // Box status
+            else
+            	printf("\t|.|");
+            
+        }
+        printf("\n\n");
+    }
+}
+
+void
+navigateGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL], Boolean over,
+		     int *indexRow, int *indexCol, cartesian *pos, Boolean next)
+{
+	char input;
+	
+    // Display the initial gridd
+    displayGrid(set_F1, set_F2, over, *indexRow, *indexCol, next);
+
+    // loop
+    do { 
+        // Check if a key has been pressed
+        if (kbhit()) {
+            input = getch(); // Get the pressed key
+            switch (input) 
+            {
+                case 'W':
+                case 'w':
+                    if (*indexRow > 0) 
+                        (*indexRow)--;
+                    break;
+                case 'A':
+                case 'a':
+                    if (*indexCol > 0) 
+                    (*indexCol)--;
+                    break;
+                case 'S':
+                case 's':
+                    if (*indexRow < F_ROW - 1) 
+                        (*indexRow)++;
+                    break;
+                case 'D':
+                case 'd':
+                    if (*indexCol < F_COL - 1) 
+                    (*indexCol)++;
+                    break;
+
+                case '\r': // Enter key
+                    if (set_F1[*indexRow][*indexCol].x == 0 && set_F2[*indexRow][*indexCol].x == 0) 
+                    {
+                    	pos->x = *indexRow + 1;
+                    	pos->y = *indexCol + 1;
+                    	
+                        if (next)
+                        {
+                        	set_F1[*indexRow][*indexCol].x = *indexRow+1; // Place player position
+                        	set_F1[*indexRow][*indexCol].y = *indexCol+1;
+                        }
+                        else if(!next)
+                        {
+                        	set_F2[*indexRow][*indexCol].x = *indexRow+1; // Place player position
+                        	set_F2[*indexRow][*indexCol].y = *indexCol+1;
+                        }
+                    }
+                
+                default:
+                    break;
+            }
+
+            // Display the updated grid
+            displayGrid(set_F1, set_F2, over, *indexRow, *indexCol, next);
+            
+        }
+    }while (input != '\r');
 }
