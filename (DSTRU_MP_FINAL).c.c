@@ -31,7 +31,7 @@ void addElement_F(cartesian *, cartesian [][F_COL]);
 void addElement_C(cartesian *, cartesian [][C_COL]);
 int getPatternsCompleted(cartesian [][F_COL]);
 int getCardinality_C(cartesian [][C_COL]);
-void displayGrid(cartesian [][F_COL], cartesian [][F_COL], cartesian *, Boolean, Boolean);
+void displayGrid(cartesian [][F_COL], cartesian [][F_COL], cartesian *, Boolean, Boolean, char []);
 void navigateGrid(cartesian [][F_COL], cartesian [][F_COL], int, int *, int *, cartesian *, Boolean);
 
 
@@ -92,8 +92,8 @@ main()
 		nC_Cardinality 1-2 is the number of patterns completed by the player
 						   checked by relying on set_C 1 or 2
 	*/
-	int nF1_PatternCompleted;
-	int nF2_PatternCompleted;
+	int nF1_PatternsCompleted;
+	int nF2_PatternsCompleted;
 	int nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
 	
 	int nC1_Cardinality;
@@ -112,7 +112,7 @@ main()
 	do	
 	{		
 		// displays the initial grid
-	    displayGrid(set_F1, set_F2, &temp_pos, over, next);
+	    displayGrid(set_F1, set_F2, &temp_pos, over, next, results);
 	
 	    // loop
 	    do
@@ -164,7 +164,7 @@ main()
 	        }
 	
 	        // displays the updated grid
-	        displayGrid(set_F1, set_F2, &temp_pos, over, next);
+	        displayGrid(set_F1, set_F2, &temp_pos, over, next, results);
 	        
 	    }while (input != '\r');
 	    
@@ -182,17 +182,17 @@ main()
 			nF3_Cardinality = getSet_F3(set_F1, set_F2, set_F3);
 			
 			// determines the actual number of patterns completed
-			nF1_PatternCompleted = getPatternsCompleted(set_F1);
-			nF2_PatternCompleted = getPatternsCompleted(set_F2);
+			nF1_PatternsCompleted = getPatternsCompleted(set_F1);
+			nF2_PatternsCompleted = getPatternsCompleted(set_F2);
 			
 			// determines the number of patterns completed that currently are stored in the set_C 1-2
 			nC1_Cardinality = getCardinality_C(set_C1);
 			nC2_Cardinality = getCardinality_C(set_C2);
 			
 			// determines if there is a new pattern completed, then adds it to set_C 1 or 2
-			if(next && (nF1_PatternCompleted > nC1_Cardinality))
+			if(next && (nF1_PatternsCompleted > nC1_Cardinality))
 				addElement_C(&quad_pos, set_C1);	
-			else if(!next && (nF2_PatternCompleted > nC2_Cardinality))
+			else if(!next && (nF2_PatternsCompleted > nC2_Cardinality))
 				addElement_C(&quad_pos, set_C2);
 				
 			// determines if the game is over
@@ -230,8 +230,11 @@ main()
 	}while(!over);
 	
 	// displays the final grid along with the game result
-	displayGrid(set_F1, set_F2, &temp_pos, over, next);
-	printf("\t\t\t\t                        %s\n\n", results);
+	displayGrid(set_F1, set_F2, &temp_pos, over, next, results);
+	
+	// prevents the user from accidentally exiting the program
+	printf("\t\tPress 0 to exit the program\n\n\n");
+	while(getch() != 48);
 	
 	return 0;
 }
@@ -424,7 +427,7 @@ getCardinality_C(cartesian sSet[][C_COL])
 				  spaces
 */
 void displayGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL],
-			     cartesian *temp_pos, Boolean over, Boolean next) 
+			     cartesian *temp_pos, Boolean over, Boolean next, char results[]) 
 {
     int i, k;
     
@@ -438,7 +441,7 @@ void displayGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL],
 		printf("\n\n\t\t\\vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/\n");
 		printf("\t\t>                                                                                   <\n");
 		printf("\t\t>                                                                                   <\n");
-	    printf("\t\t>                       WELCOME TO THE DSTRU OF DEATH GAME >:)                      <\n");
+	    printf("\t\t>                         WELCOME TO THE GAME OF TILES >:)                          <\n");
 	    printf("\t\t>                                                                                   <\n");
 	    printf("\t\t>                                                                                   <\n");
 	    printf("\t\t/^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\\n\n");
@@ -498,6 +501,8 @@ void displayGrid(cartesian set_F1[][F_COL], cartesian set_F2[][F_COL],
     	printf("\t\t\t\t\\vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv/\n");
     	printf("\t\t\t\t>                                                   <\n");
     	printf("\t\t\t\t>                      GAME OVER                    <\n");
+    	printf("\t\t\t\t>                                                   <\n");
+    	printf("\t\t\t\t>                       %s                      <\n", results);
     	printf("\t\t\t\t>                                                   <\n");
     	printf("\t\t\t\t/^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\\n\n\n");
 	}
